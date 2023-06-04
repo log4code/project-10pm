@@ -20,6 +20,8 @@ The information medium may be in:
 - Text presented within an image
 - Audio
 
+The goal is to be able to consume various forms of informational style content and parse out dates/times/locations/events to provide a timely display of upcoming reminders while also allowing for free text search capabilies to find important information.
+
 ## Technology
 
 ### Languages and Frameworks
