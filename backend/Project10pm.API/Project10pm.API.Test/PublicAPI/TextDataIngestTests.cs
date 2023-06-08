@@ -23,7 +23,7 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [TestCase("2023-06-06")]
-        public async Task TextPost_NonEmptyContent_Returns200(string input)
+        public async Task TextPost_NonEmptyContent_ReturnsStatusCode200(string input)
         {
             var model = new NewText()
             {
@@ -32,6 +32,19 @@ namespace Project10pm.API.Test.PublicAPI
             var client = _appFactory.CreateClient();
             var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
             Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [TestCase("2023-06-06")]
+        public async Task TextPost_NonEmptyContent_ReturnsRecordId(string input)
+        {
+            var model = new NewText()
+            {
+                Text = input
+            };
+            var client = _appFactory.CreateClient();
+            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var parseResult = await response.Content.ReadFromJsonAsync<NewTextParseResult>();
+            Assert.That(parseResult?.Id, Is.GreaterThan(0));
         }
 
         [TestCase("2023-06-06")]
@@ -48,7 +61,28 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
-        public async Task TextPost_EmptyContent_Returns400()
+        public async Task TwoTextPosts_NonEmptyContent_ReturnDifferentIds()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-06"
+            };
+            var model2 = new NewText()
+            {
+                Text = "2023-06-07"
+            };
+            
+            var client = _appFactory.CreateClient();
+            var response1 = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var response2 = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var parseResult1 = await response1.Content.ReadFromJsonAsync<NewTextParseResult>();
+            var parseResult2 = await response2.Content.ReadFromJsonAsync<NewTextParseResult>();
+
+            Assert.That(parseResult1?.Id, Is.Not.EqualTo(parseResult2?.Id));
+        }
+
+        [Test]
+        public async Task TextPost_EmptyContent_ReturnsStatusCode400()
         {
             var client = _appFactory.CreateClient();
             var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(string.Empty));
@@ -56,7 +90,7 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
-        public async Task TextPost_NoContent_Returns400()
+        public async Task TextPost_NoContent_ReturnsStatusCode400()
         {
             var client = _appFactory.CreateClient();
             var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create((object?)null));
