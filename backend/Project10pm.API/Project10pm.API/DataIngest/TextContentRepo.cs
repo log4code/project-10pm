@@ -1,9 +1,12 @@
-﻿namespace Project10pm.API.DataIngest
+﻿using System.Linq;
+
+namespace Project10pm.API.DataIngest
 {
     public class TextContentRepo
     {
-        private readonly List<string?> _textContent = new List<string?>();
+        private readonly Dictionary<int, string?> _textContent = new Dictionary<int, string?>();
         private readonly object _lock = new object();
+        private int _nextIdentity = 1;
 
         public int Add(string content)
         {
@@ -14,13 +17,26 @@
                 throw new ArgumentException("content is required.");
             }
 
-            var id = 0;
+            var id = _nextIdentity;
             lock (_lock)
             {
-                _textContent.Add(content);
-                id = _textContent.Count;
+                _textContent.Add(_nextIdentity, content);
+                _nextIdentity = _nextIdentity + 1;
             }
             return id;
+        }
+
+        /// <summary>
+        /// Retrieve all specified records
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public Dictionary<int, string?> Get(int page, int pageSize)
+        {
+            var skipCount = (pageSize * (page-1));
+            var records = _textContent.Skip(skipCount).Take(pageSize).ToDictionary(i => i.Key, i => i.Value);
+            return records;
         }
 
         /// <summary>
@@ -30,11 +46,11 @@
         /// <returns></returns>
         public object Find(int id)
         {
-            if(id < 0 ||  id > _textContent.Count)
+            if(false == _textContent.ContainsKey(id))
             {
                 throw new Exception("Invalid record id");
             }
-            var record =  _textContent[id -1];
+            var record =  _textContent[id];
             if(record == null)
             {
                 throw new Exception("Invalid record id");
@@ -45,7 +61,7 @@
         public object Remove(int id)
         {
             var record = Find(id);
-            _textContent[id-1] = null;
+            _textContent[id] = null;
             return record;
         }
     }
