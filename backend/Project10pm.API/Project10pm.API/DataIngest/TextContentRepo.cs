@@ -8,6 +8,12 @@ namespace Project10pm.API.DataIngest
         private readonly object _lock = new object();
         private int _nextIdentity = 1;
 
+        /// <summary>
+        /// Add a new record
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">When required parameters are missing</exception>
         public int Add(string content)
         {
             ArgumentNullException.ThrowIfNull(content);
@@ -44,6 +50,7 @@ namespace Project10pm.API.DataIngest
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        /// <exception cref="Exception">When record id provided is invalid</exception>
         public object Find(int id)
         {
             if(false == _textContent.ContainsKey(id))
@@ -58,6 +65,12 @@ namespace Project10pm.API.DataIngest
             return record;
         }
 
+        /// <summary>
+        /// Remove a record with a known id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception">When record id provided is invalid</exception>
         public object Remove(int id)
         {
             var record = Find(id);

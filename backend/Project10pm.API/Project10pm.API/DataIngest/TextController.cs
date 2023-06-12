@@ -19,6 +19,29 @@ namespace Project10pm.API.DataIngest
         }
 
         /// <summary>
+        /// Delete a single record
+        /// </summary>
+        /// <param name="id">Id of the record to delete</param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult Delete([FromRoute] int id) 
+        {
+            try
+            {
+                var record = _textContentRepo.Remove(id);
+            }
+            catch(Exception)
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
         /// Retrieve all records based on the given filters
         /// </summary>
         /// <returns></returns>
