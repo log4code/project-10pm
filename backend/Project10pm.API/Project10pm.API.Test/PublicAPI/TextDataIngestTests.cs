@@ -11,17 +11,8 @@ using static Project10pm.API.DataIngest.TextController;
 namespace Project10pm.API.Test.PublicAPI
 {
     [TestFixture]
-    internal class TextDataIngestTests
+    internal class TextDataIngestTests : TextDataApiFixture
     {
-        private const string TEXT_POST_ENDPOINT = @"/api/v1/text";
-        private WebApplicationFactory<Program> _appFactory;
-
-        [SetUp]
-        public void SetUp() 
-        {
-            _appFactory = new WebApplicationFactory<Program>();
-        }
-
         [TestCase("2023-06-06")]
         public async Task TextPost_NonEmptyContent_ReturnsStatusCode200(string input)
         {
@@ -29,8 +20,9 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = input
             };
-            var client = _appFactory.CreateClient();
-            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+
+            var response = await PostNewTextContent(model);
+
             Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status200OK));
         }
 
@@ -41,8 +33,7 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = input
             };
-            var client = _appFactory.CreateClient();
-            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var response = await PostNewTextContent(model);
             var parseResult = await response.Content.ReadFromJsonAsync<NewTextParseResult>();
             Assert.That(parseResult?.Id, Is.GreaterThan(0));
         }
@@ -54,8 +45,7 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = input
             };
-            var client = _appFactory.CreateClient();
-            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var response = await PostNewTextContent(model);
             var parseResult = await response.Content.ReadFromJsonAsync<NewTextParseResult>();
             Assert.That(parseResult?.InputText, Is.EqualTo(input));
         }
@@ -72,9 +62,8 @@ namespace Project10pm.API.Test.PublicAPI
                 Text = "2023-06-07"
             };
             
-            var client = _appFactory.CreateClient();
-            var response1 = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
-            var response2 = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var response1 = await PostNewTextContent(model);
+            var response2 = await PostNewTextContent(model);
             var parseResult1 = await response1.Content.ReadFromJsonAsync<NewTextParseResult>();
             var parseResult2 = await response2.Content.ReadFromJsonAsync<NewTextParseResult>();
 
@@ -84,16 +73,14 @@ namespace Project10pm.API.Test.PublicAPI
         [Test]
         public async Task TextPost_EmptyContent_ReturnsStatusCode400()
         {
-            var client = _appFactory.CreateClient();
-            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(string.Empty));
+            var response = await PostNewTextContent(new NewText { Text = string.Empty });
             Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status400BadRequest));
         }
 
         [Test]
         public async Task TextPost_NoContent_ReturnsStatusCode400()
         {
-            var client = _appFactory.CreateClient();
-            var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create((object?)null));
+            var response = await _httpClient.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create((object?)null));
             Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status400BadRequest));
         }
     }

@@ -10,19 +10,8 @@ using static Project10pm.API.DataIngest.TextController;
 
 namespace Project10pm.API.Test.PublicAPI
 {
-    internal class TextDataDeleteTests
+    internal class TextDataDeleteTests : TextDataApiFixture
     {
-        private const string TEXT_GET_ENDPOINT = @"/api/v1/text";
-        private const string TEXT_POST_ENDPOINT = @"/api/v1/text";
-        private const string TEXT_DELETE_ENDPOINT = @"/api/v1/text";
-        private WebApplicationFactory<Program> _appFactory;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _appFactory = new WebApplicationFactory<Program>();
-        }
-
         [Test]
         public async Task TextDelete_ValidId_ReturnsStatusCode204()
         {
@@ -30,11 +19,10 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-08"
             };
-            var client = _appFactory.CreateClient();
 
-            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResponse = await PostNewTextContent(model);
             var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
-            var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
+            var response = await _httpClient.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
 
             Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status204NoContent));
         }
@@ -46,8 +34,7 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-08"
             };
-            var client = _appFactory.CreateClient();
-            var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/1");
+            var response = await _httpClient.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/1");
 
             Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
         }
@@ -59,8 +46,7 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-08"
             };
-            var client = _appFactory.CreateClient();
-            var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/asdf");
+            var response = await _httpClient.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/asdf");
 
             Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         }
@@ -72,12 +58,11 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-08"
             };
-            var client = _appFactory.CreateClient();
 
-            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResponse = await PostNewTextContent(model);
             var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
-            var deleteResponse = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
-            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
+            var deleteResponse = await _httpClient.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
+            var getResponse = await GetSingle(postResult?.Id);
 
             Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
         }

@@ -8,18 +8,8 @@ using static Project10pm.API.DataIngest.TextController;
 
 namespace Project10pm.API.Test.PublicAPI
 {
-    internal class TextDataRetrievalTests
+    internal class TextDataRetrievalTests : TextDataApiFixture
     {
-        private const string TEXT_POST_ENDPOINT = @"/api/v1/text";
-        private const string TEXT_GET_ENDPOINT = @"/api/v1/text";
-        private WebApplicationFactory<Program> _appFactory;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _appFactory = new WebApplicationFactory<Program>();
-        }
-
         [Test]
         public async Task TextGet_SingleId_ReturnsStatusCode200()
         {
@@ -27,11 +17,10 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-12"
             };
-            var client = _appFactory.CreateClient();
 
-            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResponse = await PostNewTextContent(model);
             var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
-            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
+            var getResponse = await GetSingle(postResult?.Id);
             
             Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
         }
@@ -43,12 +32,10 @@ namespace Project10pm.API.Test.PublicAPI
             {
                 Text = "2023-06-12"
             };
-            var client = _appFactory.CreateClient();
 
-            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResponse = await PostNewTextContent(model);
             var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
-            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
-            var getResult = await getResponse.Content.ReadFromJsonAsync<TextContent>();
+            var getResult = await GetSingleTextContent(postResult?.Id);
 
             Assert.That(getResult?.Id, Is.EqualTo(postResult?.Id));
             Assert.That(getResult.Text, Is.EqualTo(model.Text));
@@ -57,25 +44,20 @@ namespace Project10pm.API.Test.PublicAPI
         [Test]
         public async Task TextGet_InvalidId_ReturnsStatusCode404()
         {
-            var client = _appFactory.CreateClient();
-            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/1");
-
+            var getResponse = await GetSingle(1);
             Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
         }
 
         [Test]
         public async Task TextGet_BadId_ReturnsStatusCode400()
         {
-            var client = _appFactory.CreateClient();
-            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/asdfasdf");
-
+            var getResponse = await _httpClient.GetAsync($"{TEXT_GET_ENDPOINT}/asdfasdf");
             Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         }
 
         [Test]
         public async Task TextGet_NoFilters_ReturnPaginatedRecords()
         {
-            var client = _appFactory.CreateClient();
             var date = new DateTime(2023, 1, 1,0,0,0,DateTimeKind.Utc);
             var dateCount = TextController.DEFAULT_PAGE_SIZE;
 
@@ -86,7 +68,7 @@ namespace Project10pm.API.Test.PublicAPI
                 {
                     Text = date.AddDays(i).ToString(),
                 };
-                var response = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+                var response = await PostNewTextContent(model);
                 var parseResult = await response.Content.ReadFromJsonAsync<NewTextParseResult>();
                 storedRecords.Add(new TextContent
                 {
@@ -95,7 +77,7 @@ namespace Project10pm.API.Test.PublicAPI
                 });
             }
             
-            var records = await client.GetFromJsonAsync<List<TextContent>>(TEXT_GET_ENDPOINT) ?? new List<TextContent>();
+            var records = await _httpClient.GetFromJsonAsync<List<TextContent>>(TEXT_GET_ENDPOINT) ?? new List<TextContent>();
 
             var except = storedRecords.Except(records, new TextContentComparer());
             Assert.That(except.Count, Is.EqualTo(dateCount - TextController.DEFAULT_PAGE_SIZE));
