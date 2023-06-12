@@ -53,6 +53,19 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
+        public async Task TextDelete_BadId_ReturnsStatusCode400()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-08"
+            };
+            var client = _appFactory.CreateClient();
+            var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/asdf");
+
+            Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
         public async Task TextDelete_ValidId_IsReallyDeleted()
         {
             var model = new NewText()
