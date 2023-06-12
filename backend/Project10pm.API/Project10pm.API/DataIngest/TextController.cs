@@ -35,7 +35,7 @@ namespace Project10pm.API.DataIngest
             }
             catch(Exception)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             return NoContent();

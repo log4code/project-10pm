@@ -40,6 +40,19 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
+        public async Task TextDelete_InvalidId_ReturnsStatusCode404()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-08"
+            };
+            var client = _appFactory.CreateClient();
+            var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/1");
+
+            Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
         public async Task TextDelete_ValidId_IsReallyDeleted()
         {
             var model = new NewText()
