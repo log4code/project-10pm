@@ -42,12 +42,40 @@ namespace Project10pm.API.DataIngest
         }
 
         /// <summary>
+        /// Retrieve a single record by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextContent))]
+        public IActionResult GetSingle([FromRoute] int id)
+        {
+            KeyValuePair<int, string> record;
+            try
+            {
+                record = _textContentRepo.Find(id);
+            }
+            catch(Exception)
+            {
+                return NotFound();
+            }
+
+            var result = new TextContent
+            {
+                Id = record.Key,
+                Text = record.Value
+            };
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Retrieve all records based on the given filters
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TextContent>))]
-        public IActionResult Get()
+        public IActionResult GetMany()
         {
             Dictionary<int, string?> records = _textContentRepo.Get(DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
             var results = records.Select(item => new TextContent

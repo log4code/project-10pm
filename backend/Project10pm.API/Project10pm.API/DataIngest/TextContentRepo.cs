@@ -51,18 +51,21 @@ namespace Project10pm.API.DataIngest
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception">When record id provided is invalid</exception>
-        public object Find(int id)
+        public KeyValuePair<int, string> Find(int id)
         {
             if(false == _textContent.ContainsKey(id))
             {
                 throw new Exception("Invalid record id");
             }
+
             var record =  _textContent[id];
+
             if(record == null)
             {
                 throw new Exception("Invalid record id");
             }
-            return record;
+
+            return new KeyValuePair<int, string>(id, record);
         }
 
         /// <summary>
@@ -71,7 +74,7 @@ namespace Project10pm.API.DataIngest
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception">When record id provided is invalid</exception>
-        public object Remove(int id)
+        public KeyValuePair<int, string> Remove(int id)
         {
             var record = Find(id);
             _textContent[id] = null;

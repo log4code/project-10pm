@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Project10pm.API.DataIngest;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -17,6 +18,58 @@ namespace Project10pm.API.Test.PublicAPI
         public void SetUp()
         {
             _appFactory = new WebApplicationFactory<Program>();
+        }
+
+        [Test]
+        public async Task TextGet_SingleId_ReturnsStatusCode200()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-12"
+            };
+            var client = _appFactory.CreateClient();
+
+            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
+            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
+            
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        }
+
+        [Test]
+        public async Task TextGet_SingleId_ReturnsValidRecord()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-12"
+            };
+            var client = _appFactory.CreateClient();
+
+            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
+            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
+            var getResult = await getResponse.Content.ReadFromJsonAsync<TextContent>();
+
+            Assert.That(getResult?.Id, Is.EqualTo(postResult?.Id));
+            Assert.That(getResult.Text, Is.EqualTo(model.Text));
+        }
+
+        [Test]
+        public async Task TextGet_InvalidId_ReturnsStatusCode404()
+        {
+            var client = _appFactory.CreateClient();
+            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/1");
+
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        public async Task TextGet_BadId_ReturnsStatusCode400()
+        {
+            var client = _appFactory.CreateClient();
+            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/asdfasdf");
+
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         }
 
         [Test]
