@@ -12,6 +12,7 @@ namespace Project10pm.API.Test.PublicAPI
 {
     internal class TextDataDeleteTests
     {
+        private const string TEXT_GET_ENDPOINT = @"/api/v1/text";
         private const string TEXT_POST_ENDPOINT = @"/api/v1/text";
         private const string TEXT_DELETE_ENDPOINT = @"/api/v1/text";
         private WebApplicationFactory<Program> _appFactory;
@@ -36,6 +37,23 @@ namespace Project10pm.API.Test.PublicAPI
             var response = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
 
             Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status204NoContent));
+        }
+
+        [Test]
+        public async Task TextDelete_ValidId_IsReallyDeleted()
+        {
+            var model = new NewText()
+            {
+                Text = "2023-06-08"
+            };
+            var client = _appFactory.CreateClient();
+
+            var postResponse = await client.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create(model));
+            var postResult = await postResponse.Content.ReadFromJsonAsync<NewTextParseResult>();
+            var deleteResponse = await client.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/{postResult?.Id}");
+            var getResponse = await client.GetAsync($"{TEXT_GET_ENDPOINT}/{postResult?.Id}");
+
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
         }
     }
 }
