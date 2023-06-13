@@ -1,4 +1,4 @@
-namespace Project10pm.API
+namespace Project10pm
 {
     public class WeatherForecast
     {
