@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Project10pm.API.DataIngest;
+using Project10pm.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

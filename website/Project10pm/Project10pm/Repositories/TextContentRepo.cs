@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Project10pm.API.DataIngest
+namespace Project10pm.Repositories
 {
     public class TextContentRepo
     {
@@ -17,8 +17,8 @@ namespace Project10pm.API.DataIngest
         public int Add(string content)
         {
             ArgumentNullException.ThrowIfNull(content);
-            if(string.IsNullOrEmpty(content) 
-                || string.IsNullOrWhiteSpace(content)) 
+            if (string.IsNullOrEmpty(content)
+                || string.IsNullOrWhiteSpace(content))
             {
                 throw new ArgumentException("content is required.");
             }
@@ -40,7 +40,7 @@ namespace Project10pm.API.DataIngest
         /// <returns></returns>
         public Dictionary<int, string?> Get(int page, int pageSize)
         {
-            var skipCount = (pageSize * (page-1));
+            var skipCount = pageSize * (page - 1);
             var records = _textContent.Skip(skipCount).Take(pageSize).ToDictionary(i => i.Key, i => i.Value);
             return records;
         }
@@ -53,14 +53,14 @@ namespace Project10pm.API.DataIngest
         /// <exception cref="Exception">When record id provided is invalid</exception>
         public KeyValuePair<int, string> Find(int id)
         {
-            if(false == _textContent.ContainsKey(id))
+            if (false == _textContent.ContainsKey(id))
             {
                 throw new Exception("Invalid record id");
             }
 
-            var record =  _textContent[id];
+            var record = _textContent[id];
 
-            if(record == null)
+            if (record == null)
             {
                 throw new Exception("Invalid record id");
             }

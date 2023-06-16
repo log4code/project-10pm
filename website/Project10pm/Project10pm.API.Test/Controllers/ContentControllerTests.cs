@@ -1,14 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Project10pm.API.DataIngest;
 using Project10pm.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Project10pm.API.DataIngest.TextController;
+using Project10pm.Repositories;
+using static Project10pm.Controllers.ContentController;
 
 namespace Project10pm.API.Test.Controllers
 {
