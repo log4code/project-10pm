@@ -11,10 +11,46 @@ namespace Project10pm.API.Test.Controllers
     {
         private TextContentRepo _textContentRepo;
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+        [SetUp]
+        public void SetUp()
         {
             _textContentRepo = new TextContentRepo();
+        }
+
+        [Test]
+        public void ContentIndex_DefaultPagination_Returns200WithView()
+        {
+            for (var i = 1; i <= 10; i++)
+            {
+                _textContentRepo.Add($"content{i}");
+            }
+
+            var controller = new ContentController(_textContentRepo);
+            controller.ControllerContext.HttpContext = new DefaultHttpContext();
+            var result = controller.Index() as ViewResult;
+
+            Assert.That(controller.Response.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Model, Is.Not.Null); // add additional checks on the Model
+            Assert.That(string.IsNullOrEmpty(result.ViewName) || result.ViewName == "Index", Is.True);
+        }
+
+        [Test]
+        public void ContentIndex_DefaultPagination_ReturnsListModel()
+        {
+            for(var i = 1; i <= 10; i++)
+            {
+                _textContentRepo.Add($"content{i}");
+            }
+
+            var controller = new ContentController(_textContentRepo);
+            controller.ControllerContext.HttpContext = new DefaultHttpContext();
+            var result = controller.Index() as ViewResult;
+
+            Assert.That(controller.Response.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Model, Is.Not.Null); // add additional checks on the Model
+            Assert.That(result.Model, Is.TypeOf<Dictionary<int, string?>>());
         }
 
         [Test]
