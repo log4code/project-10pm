@@ -108,6 +108,7 @@ namespace Project10pm.API.DataIngest
 
         public class NewText
         {
+            //TODO: move validation messaging to use resource files: https://medium.com/@hoda_sedighi/localize-validation-error-message-using-data-annotation-in-asp-net-boilerplate-fbd4a0371f2e
             [Required]
             public string Text { get; set; } = string.Empty;
         }

@@ -63,7 +63,7 @@ namespace Project10pm.API.Test.PublicAPI
             };
             
             var response1 = await PostNewTextContent(model);
-            var response2 = await PostNewTextContent(model);
+            var response2 = await PostNewTextContent(model2);
             var parseResult1 = await response1.Content.ReadFromJsonAsync<NewTextParseResult>();
             var parseResult2 = await response2.Content.ReadFromJsonAsync<NewTextParseResult>();
 
@@ -71,17 +71,17 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
-        public async Task TextPost_EmptyContent_ReturnsStatusCode400()
+        public async Task TextPost_EmptyContent_ReturnsStatusCode422()
         {
             var response = await PostNewTextContent(new NewText { Text = string.Empty });
-            Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status400BadRequest));
+            Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
         }
 
         [Test]
-        public async Task TextPost_NoContent_ReturnsStatusCode400()
+        public async Task TextPost_NoContent_ReturnsStatusCode422()
         {
             var response = await _httpClient.PostAsync(TEXT_POST_ENDPOINT, JsonContent.Create((object?)null));
-            Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status400BadRequest));
+            Assert.That(((int)response.StatusCode), Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
         }
     }
 }

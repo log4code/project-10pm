@@ -50,7 +50,7 @@ namespace Project10pm.API.Test.DataStore
         {
             var id = _repo.Add("2023-06-07");
             var record = _repo.Find(id);
-            Assert.That(record, Is.Not.Null);
+            Assert.That(record.Key, Is.EqualTo(id));
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace Project10pm.API.Test.DataStore
         {
             var id = _repo.Add("2023-06-07");
             var record = _repo.Remove(id);
-            Assert.That(record, Is.Not.Null);
+            Assert.That(record.Key, Is.EqualTo(id));
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace Project10pm.API.Test.DataStore
             var id2 = _repo.Add("2023-06-07");
             _repo.Remove(id1);
             var record2 = _repo.Find(id2);
-            Assert.That(record2, Is.Not.Null);
+            Assert.That(record2.Key, Is.EqualTo(id2));
         }
     }
 }

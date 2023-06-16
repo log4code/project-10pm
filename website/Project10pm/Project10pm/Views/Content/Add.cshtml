@@ -1,0 +1,14 @@
+﻿@using static Project10pm.API.DataIngest.TextController;
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model NewText
+@{
+}
+
+<form action="" method="post">
+    @Html.LabelFor(m => m.Text)
+    @Html.TextAreaFor(m => m.Text, rows: 20, columns: 80, htmlAttributes: null)
+    @Html.ValidationMessageFor(m => m.Text)
+    <button type="submit">Submit</button>
+</form>

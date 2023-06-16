@@ -40,7 +40,7 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
-        public async Task TextDelete_BadId_ReturnsStatusCode400()
+        public async Task TextDelete_BadId_ReturnsStatusCode422()
         {
             var model = new NewText()
             {
@@ -48,7 +48,7 @@ namespace Project10pm.API.Test.PublicAPI
             };
             var response = await _httpClient.DeleteAsync($"{TEXT_DELETE_ENDPOINT}/asdf");
 
-            Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+            Assert.That((int)response.StatusCode, Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
         }
 
         [Test]

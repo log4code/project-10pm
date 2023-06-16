@@ -49,10 +49,10 @@ namespace Project10pm.API.Test.PublicAPI
         }
 
         [Test]
-        public async Task TextGet_BadId_ReturnsStatusCode400()
+        public async Task TextGet_BadId_ReturnsStatusCode422()
         {
             var getResponse = await _httpClient.GetAsync($"{TEXT_GET_ENDPOINT}/asdfasdf");
-            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
         }
 
         [Test]
