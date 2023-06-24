@@ -21,7 +21,11 @@ namespace Project10pm.API.Test.DataStore
         [Test]
         public void NewRecord_ValidModel_ReturnsId()
         {
-            var id = _repo.Add("2023-06-07");
+            var content = new TextContent
+            {
+                RawText = $"2023-06-07"
+            };
+            var id = _repo.Add(content);
             Assert.That(id, Is.GreaterThan(0));
         }
 
@@ -41,14 +45,18 @@ namespace Project10pm.API.Test.DataStore
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                _repo.Add(string.Empty);
+                _repo.Add(new TextContent());
             });
         }
 
         [Test]
         public void GetRecord_ValidId_ReturnsRecord()
         {
-            var id = _repo.Add("2023-06-07");
+            var content = new TextContent
+            {
+                RawText = $"2023-06-07"
+            };
+            var id = _repo.Add(content);
             var record = _repo.Find(id);
             Assert.That(record.Key, Is.EqualTo(id));
         }
@@ -65,7 +73,11 @@ namespace Project10pm.API.Test.DataStore
         [Test]
         public void DeleteRecord_ValidId_ReturnsRecord() 
         {
-            var id = _repo.Add("2023-06-07");
+            var content = new TextContent
+            {
+                RawText = $"2023-06-07"
+            };
+            var id = _repo.Add(content);
             var record = _repo.Remove(id);
             Assert.That(record.Key, Is.EqualTo(id));
         }
@@ -82,7 +94,11 @@ namespace Project10pm.API.Test.DataStore
         [Test]
         public void RetrieveRecord_DeletedId_ThrowsException()
         {
-            var id = _repo.Add("2023-06-07");
+            var content = new TextContent
+            {
+                RawText = $"2023-06-07"
+            };
+            var id = _repo.Add(content);
             var record = _repo.Remove(id);
             Assert.Throws<Exception>(() =>
             {
@@ -93,8 +109,16 @@ namespace Project10pm.API.Test.DataStore
         [Test(Description = "This test is mostly to ensure any mocked repos are handling ids correctly.")]
         public void TwoNewRecords_DeleteFirst_GetSecondReturnsRecord()
         {
-            var id1 = _repo.Add("2023-06-06");
-            var id2 = _repo.Add("2023-06-07");
+            var content1 = new TextContent
+            {
+                RawText = $"2023-06-06"
+            };
+            var content2 = new TextContent
+            {
+                RawText = $"2023-06-07"
+            };
+            var id1 = _repo.Add(content1);
+            var id2 = _repo.Add(content2);
             _repo.Remove(id1);
             var record2 = _repo.Find(id2);
             Assert.That(record2.Key, Is.EqualTo(id2));

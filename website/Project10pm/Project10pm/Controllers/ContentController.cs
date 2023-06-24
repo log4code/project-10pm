@@ -7,7 +7,7 @@ namespace Project10pm.Controllers
 {
     public class ContentController : Controller
     {
-        private TextContentRepo _textContentRepo;
+        private readonly TextContentRepo _textContentRepo;
 
         public ContentController(TextContentRepo textContentRepo)
         {
@@ -43,12 +43,18 @@ namespace Project10pm.Controllers
                 return View("Add", model);
             }
 
-            var id = _textContentRepo.Add(model.Text);
+            var textContent = new TextContent
+            {
+                RawText = model.Text
+            };
+            var id = _textContentRepo.Add(textContent);
             var result = new NewTextParseResult()
             {
                 Id = id,
                 InputText = model.Text
             };
+
+            ViewData["result"] = result;
             return RedirectToAction("Index", "Content");
         }
 
@@ -65,15 +71,15 @@ namespace Project10pm.Controllers
             public string? InputText { get; set; }
         }
 
-        public class TextContent
+        public class TextContentResult
         {
             public int Id { get; set; }
             public string? Text { get; set; }
         }
 
-        public class TextContentComparer : IEqualityComparer<TextContent?>
+        public class TextContentComparer : IEqualityComparer<TextContentResult?>
         {
-            public bool Equals(TextContent? x, TextContent? y)
+            public bool Equals(TextContentResult? x, TextContentResult? y)
             {
                 if (x == null && y == null)
                 {
@@ -93,7 +99,7 @@ namespace Project10pm.Controllers
                 return false;
             }
 
-            public int GetHashCode([DisallowNull] TextContent obj)
+            public int GetHashCode([DisallowNull] TextContentResult obj)
             {
                 var hash = $"{obj.Id}:{obj.Text}".GetHashCode();
                 return hash;

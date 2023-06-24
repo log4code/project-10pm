@@ -22,7 +22,11 @@ namespace Project10pm.API.Test.Controllers
         {
             for (var i = 1; i <= 10; i++)
             {
-                _textContentRepo.Add($"content{i}");
+                var content = new TextContent
+                {
+                    RawText = $"content{i}"
+                };
+                _textContentRepo.Add(content);
             }
 
             var controller = new ContentController(_textContentRepo);
@@ -40,7 +44,11 @@ namespace Project10pm.API.Test.Controllers
         {
             for(var i = 1; i <= 10; i++)
             {
-                _textContentRepo.Add($"content{i}");
+                var content = new TextContent
+                {
+                    RawText = $"content{i}"
+                };
+                _textContentRepo.Add(content);
             }
 
             var controller = new ContentController(_textContentRepo);
@@ -50,7 +58,7 @@ namespace Project10pm.API.Test.Controllers
             Assert.That(controller.Response.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Model, Is.Not.Null); // add additional checks on the Model
-            Assert.That(result.Model, Is.TypeOf<Dictionary<int, string?>>());
+            Assert.That(result.Model, Is.TypeOf<Dictionary<int, TextContent?>>());
         }
 
         [Test]

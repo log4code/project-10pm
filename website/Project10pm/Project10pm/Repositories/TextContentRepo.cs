@@ -4,8 +4,8 @@ namespace Project10pm.Repositories
 {
     public class TextContentRepo
     {
-        private readonly Dictionary<int, string?> _textContent = new Dictionary<int, string?>();
-        private readonly object _lock = new object();
+        private readonly Dictionary<int, TextContent?> _textContent = new();
+        private readonly object _lock = new();
         private int _nextIdentity = 1;
 
         /// <summary>
@@ -14,11 +14,11 @@ namespace Project10pm.Repositories
         /// <param name="content"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">When required parameters are missing</exception>
-        public int Add(string content)
+        public int Add(TextContent content)
         {
             ArgumentNullException.ThrowIfNull(content);
-            if (string.IsNullOrEmpty(content)
-                || string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrEmpty(content.RawText)
+                || string.IsNullOrWhiteSpace(content.RawText))
             {
                 throw new ArgumentException("content is required.");
             }
@@ -38,7 +38,7 @@ namespace Project10pm.Repositories
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public Dictionary<int, string?> Get(int page, int pageSize)
+        public Dictionary<int, TextContent?> Get(int page, int pageSize)
         {
             var skipCount = pageSize * (page - 1);
             var records = _textContent.Skip(skipCount).Take(pageSize).ToDictionary(i => i.Key, i => i.Value);
@@ -51,7 +51,7 @@ namespace Project10pm.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception">When record id provided is invalid</exception>
-        public KeyValuePair<int, string> Find(int id)
+        public KeyValuePair<int, TextContent> Find(int id)
         {
             if (false == _textContent.ContainsKey(id))
             {
@@ -65,7 +65,7 @@ namespace Project10pm.Repositories
                 throw new Exception("Invalid record id");
             }
 
-            return new KeyValuePair<int, string>(id, record);
+            return new KeyValuePair<int, TextContent>(id, record);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Project10pm.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception">When record id provided is invalid</exception>
-        public KeyValuePair<int, string> Remove(int id)
+        public KeyValuePair<int, TextContent> Remove(int id)
         {
             var record = Find(id);
             _textContent[id] = null;

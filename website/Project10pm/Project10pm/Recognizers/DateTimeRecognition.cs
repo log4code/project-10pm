@@ -48,8 +48,10 @@ namespace Project10pm.Recognizers
         public SortedDictionary<string, object> Resolution { get; set; } = new SortedDictionary<string, object>();
     }
 
-    public class DateTimeRecognitionParts
+    public class DateTimeResolutionParts
     {
 
     }
+
+
 }

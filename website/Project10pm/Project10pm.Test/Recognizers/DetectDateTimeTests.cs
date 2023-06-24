@@ -49,6 +49,18 @@ namespace Project10pm.Test.Recognizers
             Assert.That(expectedResult.SnippetText, Is.Not.Null);
         }
 
+        [TestCase(DateTimeRecognition.ENGLISH_CULTURE, "06-14-2023 10:15 pm", "06-14-2023 10:15 pm")]
+        [TestCase(DateTimeRecognition.ENGLISH_CULTURE, "06-14-2023 10:15:00", "06-14-2023 10:15:00")]
+        public void SingleExplitInstance_FullDateTime_ReturnsValidResult(string culture, string content, string dateText)
+        {
+            var results = DateTimeRecognition.DetectDateTimeReferences(content, culture);
+            var expectedResult = results.First(i => i.SnippetText == dateText);
 
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
+            Assert.That(expectedResult.SnippetText, Is.Not.Null);
+        }
     }
 }
