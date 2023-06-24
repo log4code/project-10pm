@@ -30,6 +30,51 @@ namespace Project10pm.API.Test.DataStore
         }
 
         [Test]
+        public void GetRecord_WithEvents_ReturnsCorrectEvents()
+        {
+            var event1 = new Event
+            {
+                EventDateTimeOffset = DateTimeOffset.Now,
+                EventDescription = "Description",
+                EventName = "Name"
+            };
+
+            var event2 = new Event
+            {
+                EventDateTimeOffset = DateTimeOffset.Now,
+                EventDescription = "Description2",
+                EventName = "Name2"
+            };
+
+            var content = new TextContent
+            {
+                RawText = $"2023-06-07",
+                Events = new List<Event>
+                {
+                    event1, 
+                    event2
+                }
+            };
+
+            var id = _repo.Add(content);
+            var record = _repo.Find(id);
+
+            var recordEvent1 = record.Value.Events.First(i => i.EventName == event1.EventName);
+            var recordEvent2 = record.Value.Events.First(i => i.EventName == event2.EventName);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(recordEvent1, Is.Not.Null);
+                Assert.That(recordEvent1.EventDescription, Is.EqualTo(event1.EventDescription));
+                Assert.That(recordEvent1.EventDateTimeOffset, Is.EqualTo(event1.EventDateTimeOffset));
+
+                Assert.That(recordEvent2, Is.Not.Null);
+                Assert.That(recordEvent2.EventDescription, Is.EqualTo(event2.EventDescription));
+                Assert.That(recordEvent2.EventDateTimeOffset, Is.EqualTo(event2.EventDateTimeOffset));
+            });
+        }
+
+        [Test]
         public void NewRecord_NullModel_ThrowsException() 
         {
             Assert.Throws<ArgumentNullException>(() =>

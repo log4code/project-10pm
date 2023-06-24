@@ -43,11 +43,14 @@ namespace Project10pm.Controllers
                 return View("Add", model);
             }
 
+
+
             var textContent = new TextContent
             {
                 RawText = model.Text
             };
             var id = _textContentRepo.Add(textContent);
+
             var result = new NewTextParseResult()
             {
                 Id = id,

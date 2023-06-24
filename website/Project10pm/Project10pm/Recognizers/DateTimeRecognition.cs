@@ -20,13 +20,16 @@ namespace Project10pm.Recognizers
             var results = new List<DateTimeRecognitionResult>(rawResults.Count);
             foreach (var rawResult in rawResults)
             {
+                IEnumerable<Dictionary<string, string>>? resolutionValues = rawResult.Resolution["values"] as IEnumerable<Dictionary<string, string>>;
+                var resolutionParts = ConvertResolutionValues(resolutionValues);
+
                 results.Add(new DateTimeRecognitionResult
                 {
                     SnippetStartIndex = rawResult.Start,
                     SnippetEndIndex = rawResult.End,
                     SnippetText = rawResult.Text,
                     RecognitionTypeName = rawResult.TypeName,
-                    Resolution = rawResult.Resolution,
+                    Resolution = resolutionParts
                 });
 
                 //TODO: Temporary to learn the structure of these values
@@ -34,6 +37,45 @@ namespace Project10pm.Recognizers
             }
 
             return results;
+        }
+
+        private static List<DateTimeResolutionPart> ConvertResolutionValues(IEnumerable<Dictionary<string, string>>? objs)
+        {
+            var parts = new List<DateTimeResolutionPart>();
+            if (objs == null)
+            {
+                return parts;
+            }
+
+            foreach (var value in objs)
+            {
+                DateTimeOffset timex;
+                TimexType type = TimexType.Unknown;
+                DateTimeOffset.TryParse(value["timex"], out timex);
+
+                switch (value["type"])
+                {
+                    case "date":
+                        type = TimexType.Date;
+                        break;
+                    case "datetime":
+                        type = TimexType.DateTime;
+                        break;
+                    default:
+                        type = TimexType.Unknown;
+                        break;
+                }
+
+                var part = new DateTimeResolutionPart
+                {
+                    Timex = timex,
+                    Type = type,
+                    Value = value["timex"]
+                };
+
+                parts.Add(part);
+            }
+            return parts;
         }
     }
 
@@ -45,13 +87,20 @@ namespace Project10pm.Recognizers
         public string RecognitionTypeName { get; set; } = string.Empty;
 
         //TODO: Don't know yet what to do with this because there isn't much documentation. Will take a bit of time to discover patterns in how to use
-        public SortedDictionary<string, object> Resolution { get; set; } = new SortedDictionary<string, object>();
+        public List<DateTimeResolutionPart> Resolution { get; set; } = new List<DateTimeResolutionPart>();
     }
 
-    public class DateTimeResolutionParts
+    public class DateTimeResolutionPart
     {
-
+        public DateTimeOffset? Timex { get; set; }
+        public TimexType Type { get; set; } = TimexType.Unknown;
+        public string Value { get; set; } = string.Empty;
     }
 
-
+    public enum TimexType
+    {
+        Unknown = 0,
+        Date = 1,
+        DateTime = 2
+    }
 }
