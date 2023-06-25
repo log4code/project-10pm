@@ -3,6 +3,7 @@
 using Microsoft.Recognizers.Text;
 using Microsoft.Recognizers.Text.DateTime;
 using Newtonsoft.Json;
+using System.IO.Pipelines;
 using static Project10pm.Controllers.ContentController;
 
 namespace Project10pm.Recognizers
@@ -23,6 +24,9 @@ namespace Project10pm.Recognizers
             List<ModelResult> rawResults =
                     DateTimeRecognizer.RecognizeDateTime(content, culture);
 
+            //TODO: Temporary to learn the structure of these values
+            Console.WriteLine(JsonConvert.SerializeObject(rawResults, Formatting.Indented));
+
             var results = new List<DateTimeRecognitionResult>(rawResults.Count);
             foreach (var rawResult in rawResults)
             {
@@ -37,9 +41,6 @@ namespace Project10pm.Recognizers
                     RecognitionTypeName = rawResult.TypeName,
                     Resolution = resolutionParts
                 });
-
-                //TODO: Temporary to learn the structure of these values
-                Console.WriteLine(JsonConvert.SerializeObject(rawResult.Resolution, Formatting.Indented));
             }
 
             return results;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Project10pm.Recognizers;
 using Project10pm.Repositories;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
@@ -16,12 +17,12 @@ namespace Project10pm.Controllers
 
         public IActionResult Index()
         {
-            var records = _textContentRepo.Get(1,10);
+            var records = _textContentRepo.Get(1, 10);
             return View(records);
         }
 
         [HttpGet]
-        public IActionResult Add() 
+        public IActionResult Add()
         {
             return View();
         }
@@ -36,18 +37,37 @@ namespace Project10pm.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public IActionResult Add(NewText model)
         {
-            if(false == ModelState.IsValid) 
+            if (false == ModelState.IsValid)
             {
                 //TODO: Need to figure out how to configure middleware so this status code happens automatically instead of a 200 or 400
                 Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
                 return View("Add", model);
             }
 
+            //TODO: Eventually get this cached from the user's preferences
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+            var dateTimeReferences = DateTimeRecognition.DetectDateTimeReferences(model.Text, timeZone: timeZoneInfo);
 
+            var events = new List<Event>(dateTimeReferences.SelectMany(i => i.Resolution).Count());
+            foreach (var reference in dateTimeReferences)
+            {
+                foreach(var resolution in reference.Resolution)
+                {
+                    var eventReference = new Event
+                    {
+                        EventDateTimeOffset = resolution.LocalOffset,
+                        //TODO: differentiate between detected description and name
+                        EventDescription = reference.SnippetText,
+                        EventName = reference.SnippetText
+                    };
+                    events.Add(eventReference);
+                }
+            }
 
             var textContent = new TextContent
             {
-                RawText = model.Text
+                RawText = model.Text,
+                Events = events
             };
             var id = _textContentRepo.Add(textContent);
 
