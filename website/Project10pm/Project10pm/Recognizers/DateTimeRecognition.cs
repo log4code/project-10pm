@@ -12,8 +12,14 @@ namespace Project10pm.Recognizers
         public const string DEFAULT_CULTURE = Culture.English;
         public const string ENGLISH_CULTURE = Culture.English;
 
-        public static List<DateTimeRecognitionResult> DetectDateTimeReferences(string content, string culture = DEFAULT_CULTURE)
+        public static readonly TimeZoneInfo DEFAULT_TIME_ZONE = TimeZoneInfo.Utc;
+
+        public static List<DateTimeRecognitionResult> DetectDateTimeReferences(string content, 
+                                                                                string culture = DEFAULT_CULTURE, 
+                                                                                TimeZoneInfo? timeZone = null)
         {
+            timeZone ??= DEFAULT_TIME_ZONE;
+
             List<ModelResult> rawResults =
                     DateTimeRecognizer.RecognizeDateTime(content, culture);
 
@@ -21,7 +27,7 @@ namespace Project10pm.Recognizers
             foreach (var rawResult in rawResults)
             {
                 IEnumerable<Dictionary<string, string>>? resolutionValues = rawResult.Resolution["values"] as IEnumerable<Dictionary<string, string>>;
-                var resolutionParts = ConvertResolutionValues(resolutionValues);
+                var resolutionParts = ConvertResolutionValues(resolutionValues, timeZone);
 
                 results.Add(new DateTimeRecognitionResult
                 {
@@ -39,7 +45,7 @@ namespace Project10pm.Recognizers
             return results;
         }
 
-        private static List<DateTimeResolutionPart> ConvertResolutionValues(IEnumerable<Dictionary<string, string>>? objs)
+        private static List<DateTimeResolutionPart> ConvertResolutionValues(IEnumerable<Dictionary<string, string>>? objs, TimeZoneInfo localTimeZone)
         {
             var parts = new List<DateTimeResolutionPart>();
             if (objs == null)
@@ -47,13 +53,17 @@ namespace Project10pm.Recognizers
                 return parts;
             }
 
-            foreach (var value in objs)
+            foreach (var item in objs)
             {
-                DateTimeOffset timex;
-                TimexType type = TimexType.Unknown;
-                DateTimeOffset.TryParse(value["timex"], out timex);
+                DateTimeOffset? resolutionOffset = null;
+                DateTime unboundDateTime;
+                if(DateTime.TryParse(item["value"], out unboundDateTime))
+                {
+                    resolutionOffset = new TimeShift(unboundDateTime, localTimeZone).ToCurrentDateTimeOffset();
+                }
 
-                switch (value["type"])
+                TimexType type;
+                switch (item["type"])
                 {
                     case "date":
                         type = TimexType.Date;
@@ -68,9 +78,8 @@ namespace Project10pm.Recognizers
 
                 var part = new DateTimeResolutionPart
                 {
-                    Timex = timex,
+                    LocalOffset = resolutionOffset,
                     Type = type,
-                    Value = value["timex"]
                 };
 
                 parts.Add(part);
@@ -92,9 +101,8 @@ namespace Project10pm.Recognizers
 
     public class DateTimeResolutionPart
     {
-        public DateTimeOffset? Timex { get; set; }
+        public DateTimeOffset? LocalOffset { get; set; }
         public TimexType Type { get; set; } = TimexType.Unknown;
-        public string Value { get; set; } = string.Empty;
     }
 
     public enum TimexType

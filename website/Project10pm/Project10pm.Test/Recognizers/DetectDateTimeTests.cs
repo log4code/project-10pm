@@ -19,11 +19,14 @@ namespace Project10pm.Test.Recognizers
             var results = DateTimeRecognition.DetectDateTimeReferences(content, culture);
             var expectedResult = results.First(i => i.SnippetText == dateText);
 
-            Assert.That(results.Count, Is.EqualTo(1));
-            Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
-            Assert.That(expectedResult.SnippetText, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
+                Assert.That(expectedResult.SnippetText, Is.Not.Null);
+            });
         }
 
         [TestCase(DateTimeRecognition.ENGLISH_CULTURE, "06-14-2023 and 06-15-2023", 2)]
@@ -41,12 +44,15 @@ namespace Project10pm.Test.Recognizers
         {
             var results = DateTimeRecognition.DetectDateTimeReferences(content, culture);
             var expectedResult = results.First(i => i.SnippetText == dateText);
-
-            Assert.That(results.Count, Is.EqualTo(1));
-            Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
-            Assert.That(expectedResult.SnippetText, Is.Not.Null);
+            
+            Assert.Multiple(() =>
+            {
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
+                Assert.That(expectedResult.SnippetText, Is.Not.Null);
+            });
         }
 
         [TestCase(DateTimeRecognition.ENGLISH_CULTURE, "06-14-2023 10:15 pm", "06-14-2023 10:15 pm")]
@@ -55,12 +61,28 @@ namespace Project10pm.Test.Recognizers
         {
             var results = DateTimeRecognition.DetectDateTimeReferences(content, culture);
             var expectedResult = results.First(i => i.SnippetText == dateText);
+            
+            Assert.Multiple(() =>
+            {
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
+                Assert.That(expectedResult.SnippetText, Is.Not.Null);
+            });
+        }
 
-            Assert.That(results.Count, Is.EqualTo(1));
-            Assert.That(expectedResult.SnippetStartIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.SnippetEndIndex, Is.GreaterThanOrEqualTo(0));
-            Assert.That(expectedResult.RecognitionTypeName, Is.Not.Null);
-            Assert.That(expectedResult.SnippetText, Is.Not.Null);
+        [TestCase(DateTimeRecognition.ENGLISH_CULTURE, "06-14-2023", "America/New_York")]
+        public void SingleExplicitInstance_FullDate_ReturnsCorrectOffset(string culture, string content, string timeZoneId)
+        {
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var results = DateTimeRecognition.DetectDateTimeReferences(content, culture, timeZoneInfo);
+
+            var expectedResult = results.First();
+            DateTimeOffset? offset = expectedResult.Resolution.FirstOrDefault()?.LocalOffset;
+
+            DateTime expectedValue = DateTime.Parse(content);
+            Assert.That(offset?.LocalDateTime, Is.EqualTo(expectedValue));
         }
     }
 }
