@@ -55,7 +55,7 @@ namespace Project10pm.Controllers
                 {
                     var eventReference = new Event
                     {
-                        EventDateTimeOffset = resolution.LocalOffset,
+                        EventDateTimeOffset = resolution.LocalOffsetStart,
                         //TODO: differentiate between detected description and name
                         EventDescription = reference.SnippetText,
                         EventName = reference.SnippetText

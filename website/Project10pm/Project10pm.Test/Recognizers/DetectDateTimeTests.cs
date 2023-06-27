@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Recognizers.Text;
+using Newtonsoft.Json;
 using Project10pm.Recognizers;
 using System;
 using System.Collections.Generic;
@@ -79,10 +80,47 @@ namespace Project10pm.Test.Recognizers
             var results = DateTimeRecognition.DetectDateTimeReferences(content, culture, timeZoneInfo);
 
             var expectedResult = results.First();
-            DateTimeOffset? offset = expectedResult.Resolution.FirstOrDefault()?.LocalOffset;
+            DateTimeOffset? offset = expectedResult.Resolution.FirstOrDefault()?.LocalOffsetStart;
 
             DateTime expectedValue = DateTime.Parse(content);
             Assert.That(offset?.LocalDateTime, Is.EqualTo(expectedValue));
+        }
+
+        [Test]
+        public void FreeFormText_MultipleComplexDateTimeRanges_ReturnsAllDetectedReferences()
+        {
+            var content = @"
+End of School Celebration
+
+You are invited to celebrate the end of our 3rd grade year with Mrs. Smith's’ class!
+
+When: Tuesday, May 23rd @ 12:00 PM- 1:30 PM
+
+Where: ROOM 25
+
+The class will be having a brief song performance. This will give everyone a chance
+to take a class picture in the classroom. After we have taken class pictures, we will pass
+out their diplomas and awards and give everyone a chance to take individual and or family
+photos. After we have watched our class slide show, we will go to the cafeteria to make an end of the year treat!
+
+*This party is optional for parent attendance. We will be taking plenty of photos
+and videos throughout the day. Please RSVP below or by email by Monday May 22nd.
+"
+            ;
+
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+            var results = DateTimeRecognition.DetectDateTimeReferences(content, timeZone: timeZoneInfo);
+
+            TestContext.WriteLine(JsonConvert.SerializeObject(results, Formatting.Indented));
+
+            var dateTimeRanges = results.Where(i => i.Resolution.Any(y => y.Type == TimexType.DateTimeRange));
+             
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(results.Count, Is.GreaterThan(0));
+                Assert.That(dateTimeRanges.Count, Is.GreaterThan(0));
+            });
         }
     }
 }

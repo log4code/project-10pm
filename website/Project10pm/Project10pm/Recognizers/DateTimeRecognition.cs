@@ -46,16 +46,28 @@ namespace Project10pm.Recognizers
             return results;
         }
 
-        private static List<DateTimeResolutionPart> ConvertResolutionValues(IEnumerable<Dictionary<string, string>>? objs, TimeZoneInfo localTimeZone)
+        private static List<DateTimeResolutionPart> ConvertResolutionValues(IEnumerable<Dictionary<string, string>>? resolutions, TimeZoneInfo localTimeZone)
         {
             var parts = new List<DateTimeResolutionPart>();
-            if (objs == null)
+            if (resolutions == null)
             {
                 return parts;
             }
 
-            foreach (var item in objs)
+            foreach (var item in resolutions)
             {
+                //TODO: Keep an eye on this pattern. Probably a better breakout abstraction in the futre
+
+                if (item["type"] == "datetimerange")
+                {
+                    parts.Add(ConvertResolutionDateTimeRange(item, localTimeZone));
+                }
+
+                if(false == item.ContainsKey("value"))
+                {
+                    continue;
+                }
+
                 DateTimeOffset? resolutionOffset = null;
                 DateTime unboundDateTime;
                 if(DateTime.TryParse(item["value"], out unboundDateTime))
@@ -72,6 +84,9 @@ namespace Project10pm.Recognizers
                     case "datetime":
                         type = TimexType.DateTime;
                         break;
+                    case "datetimerange":
+                        type = TimexType.DateTimeRange;
+                        break;
                     default:
                         type = TimexType.Unknown;
                         break;
@@ -79,13 +94,45 @@ namespace Project10pm.Recognizers
 
                 var part = new DateTimeResolutionPart
                 {
-                    LocalOffset = resolutionOffset,
+                    LocalOffsetStart = resolutionOffset,
                     Type = type,
+
                 };
 
                 parts.Add(part);
             }
             return parts;
+        }
+
+        private static DateTimeResolutionPart ConvertResolutionDateTimeRange(Dictionary<string, string> item, TimeZoneInfo localTimeZone)
+        {
+
+            DateTimeOffset? startResolutionOffset = null;
+            DateTime unboundStartDateTime;
+            if (DateTime.TryParse(item["start"], out unboundStartDateTime))
+            {
+                startResolutionOffset = new TimeShift(unboundStartDateTime, localTimeZone).ToCurrentDateTimeOffset();
+            }
+
+            DateTimeOffset? endResolutionOffset = null;
+            DateTime unboundEndDateTime;
+            if (DateTime.TryParse(item["end"], out unboundEndDateTime))
+            {
+                endResolutionOffset = new TimeShift(unboundEndDateTime, localTimeZone).ToCurrentDateTimeOffset();
+            }
+
+
+            TimexType type = TimexType.DateTimeRange;
+
+            var part = new DateTimeResolutionPart
+            {
+                LocalOffsetStart = startResolutionOffset,
+                LocalOffsetEnd = endResolutionOffset,
+                Type = type,
+
+            };
+
+            return part;
         }
     }
 
@@ -102,7 +149,8 @@ namespace Project10pm.Recognizers
 
     public class DateTimeResolutionPart
     {
-        public DateTimeOffset? LocalOffset { get; set; }
+        public DateTimeOffset? LocalOffsetStart { get; set; }
+        public DateTimeOffset? LocalOffsetEnd {  get; set; }
         public TimexType Type { get; set; } = TimexType.Unknown;
     }
 
@@ -110,6 +158,7 @@ namespace Project10pm.Recognizers
     {
         Unknown = 0,
         Date = 1,
-        DateTime = 2
+        DateTime = 2,
+        DateTimeRange = 3
     }
 }
